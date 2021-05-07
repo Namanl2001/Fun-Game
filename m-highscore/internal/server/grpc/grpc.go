@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"context"
-	pbhighscore "github.com/Namanl2001/Fun-Game/m-highscore/v1"
+	pbhighscore "github.com/Namanl2001/Fun-Game/m-highscore/api/v1"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"

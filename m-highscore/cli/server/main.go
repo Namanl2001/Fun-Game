@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	grpcSetup "github.com/Namanl2001/Fun-Game/internal/server/grpc"
+	grpcSetup "github.com/Namanl2001/Fun-Game/m-highscore/internal/server/grpc"
 	"github.com/rs/zerolog/log"
 )
 
