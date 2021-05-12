@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Reaction Timer</title>
+		<style type="text/css">
+			body{
+				font-family: sans-serif;
+			}	
+			#shape{
+				width: 200px;
+				height: 200px;
+				background-color: red;
+				display: none;
+				position: relative;
+			}
+			.bold{
+				font-weight: bold;
+			}
+		</style>
+	</head>
+
+	<body>
+		<h1>Test your reactions!</h1>
+		<p>Click on the boxes and squares as quickly as you can!</p>
+		<p class="bold">Your time: <span id="timeTaken"></p>
+		<p class="bold">Best score: <span id="bestScore"></p>
+	
+        <div id="shape"></div>
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
+		<script type="text/javascript">
+			var start = new Date().getTime();
+			var highScore = Number.MAX_SAFE_INTEGER;
+			var size = 500;
+            var getHsUrl = "http://localhost:8081/geths" // For local running
+            var getSizeUrl = "http://localhost:8081/getsize"
+            var setScore = "http://localhost:8081/setscore"
+            var setHsUrl = "http://localhost:8081/seths"
+
+            // var getHsUrl = "/geths" // For kubernetes
+            // var getSizeUrl = "/getsize"
+            // var setScore = "/setscore/"
+            // var setHsUrl = "/seths/"
+
+			
+			function makeShapeAppear(){
+
+                $.ajax({
+                    url: getHsUrl,
+                    dataType: "jsonp",
+                    success: function(data) {
+                        highScore = data.hs
+                        document.getElementById("bestScore").innerHTML = highScore + "s";
+                    }
+                })
+
+                $.ajax({
+                    url: getSizeUrl,
+                    dataType: "jsonp",
+                    success: function(data) {
+                        size = data.size
+                    }
+                })
+
+				var top = Math.random()*size;
+				var left = Math.random()*size;
+				var width = Math.random()*size/2 + 100;
+				if(Math.random() > 0.5){
+					document.getElementById("shape").style.borderRadius = "50%";	// Circle			
+				} else {
+					document.getElementById("shape").style.borderRadius = "0"; // Square
+				}
+				document.getElementById("shape").style.width= width + "px";
+				document.getElementById("shape").style.height= width + "px";
+
+				document.getElementById("shape").style.top= top + "px";
+				document.getElementById("shape").style.left= left + "px";
+
+				document.getElementById("shape").style.display = "block";
+				document.getElementById("shape").style.backgroundColor= getRandomColor();
+				start = new Date().getTime();
+			}
+			
+			function appearAfterDelay(){
+				setTimeout(makeShapeAppear, Math.random()*2000);
+			}
+			
+			appearAfterDelay();
+			document.getElementById("shape").onclick = function(){
+				document.getElementById("shape").style.display = "none";
+				var end = new Date().getTime();
+				var timeTaken = (end-start)/1000; 
+				document.getElementById("timeTaken").innerHTML=timeTaken + "s" ; 
+				if (timeTaken < highScore) {
+                    highScore = timeTaken;
+                    document.getElementById("bestScore").innerHTML = highScore + "s";
+                    setHsUrl = "http://localhost:8081/seths/" + timeTaken;
+                    // setHsUrl = "/seths/" + timeTaken;
+                    $.ajax({
+                        url: setHsUrl,
+                        dataType: "jsonp",
+                        success: function(data) {
+                            highScore = data.hs
+                            document.getElementById("bestScore").innerHTML = highScore + "s";
+                        }
+                    })
+				}
+                setScore = "http://localhost:8081/setscore/" + timeTaken;
+                // setScore = "/setscore/" + timeTaken;
+                $.ajax({
+                    url: setScore,
+                    dataType: "jsonp",
+                    success: function(data) {
+                       
+                    }
+                })
+
+
+
+				appearAfterDelay();
+			}
+            function getRandomColor() {
+				var letters = '0123456789ABCDEF';
+				var color = '#';
+				for (var i = 0; i < 6; i++ ) {
+					color += letters[Math.floor(Math.random() * 16)];
+				}
+				return color;
+			}
+		</script>
+	</body>
+</html>
